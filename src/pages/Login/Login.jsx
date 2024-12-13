@@ -58,15 +58,19 @@ function Login(props) {
   };
 
   const getCurrentUser = () => {
+    console.log("Getting current user");
     const token = localStorage.getItem("jwtToken");
     if (token) {
-      fetch(`${END_POINT}/user/current`, {
+      fetch(`${END_POINT}/user/currentUser`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-        .then((response) => localStorage.setItem("user_data", response))
+        .then((response) => {
+          console.log({ response });
+          localStorage.setItem("user_data", response);
+        })
         .catch((err) => {
           console.error(err);
         });
@@ -268,7 +272,7 @@ function Login(props) {
                     </div>
                   </div>
                   <div className="checkbox-container">
-                    <input
+                    {/* <input
                       type="checkbox"
                       name="keepMeLoggedIn"
                       id="checkBox"
@@ -279,10 +283,10 @@ function Login(props) {
                           keepMeLoggedIn: e.target.checked,
                         });
                       }}
-                    />
-                    <label className="checkbox-label" htmlFor="checkBox">
+                    /> */}
+                    {/* <label className="checkbox-label" htmlFor="checkBox">
                       Keep Me Logged In
-                    </label>
+                    </label> */}
                   </div>
                   <div className="submit-btns">
                     <button
@@ -293,25 +297,15 @@ function Login(props) {
                     >
                       Login as User
                     </button>
-                    <button
+                    {/* <button
                       id="btn"
                       type="submit"
                       className="submit-btn secondary"
                       onClick={loginAdmin}
                     >
                       Login as Admin
-                    </button>
+                    </button> */}
                   </div>
-                  <Link to="#">
-                    <p
-                      style={{
-                        textAlign: "center",
-                        color: dark ? "gray" : "blue",
-                      }}
-                    >
-                      Forgot your password?
-                    </p>
-                  </Link>
                 </div>
               </form>
             </div>
