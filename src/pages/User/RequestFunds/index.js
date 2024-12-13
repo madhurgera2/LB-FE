@@ -9,6 +9,10 @@ const FundRequestForm = () => {
   const [patientName, setPatientName] = useState("");
   const [description, setDescription] = useState("");
   const [doctorId, setDoctorId] = useState("");
+  const [accountNumber, setAccountNumber] = useState("");
+  const [ifsc, setIfsc] = useState("");
+  const [bankName, setBankName] = useState("");
+  const [accountHolderName, setAccountHolderName] = useState("");
   const [doctorList, setDoctorList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -19,12 +23,12 @@ const FundRequestForm = () => {
       method: "GET",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-        accept: "application/json", 
+        accept: "application/json",
         "Content-Type": "application/json",
         "ngrok-skip-browser-warning": "true",
       },
     })
-      .then((response) => response.json()) // Wait for the JSON response
+      .then((response) => response.json())
       .then((data) => {
         const doctorList = data.map((doctor) => ({
           value: doctor.id,
@@ -41,7 +45,7 @@ const FundRequestForm = () => {
         });
       });
   }, []);
-  
+
   const handleSubmit = (event) => {
     event.preventDefault();
 
@@ -52,6 +56,10 @@ const FundRequestForm = () => {
       patient_name: patientName,
       description,
       doctor_id: doctorId,
+      account_number: accountNumber || null,
+      ifsc: ifsc || null,
+      bank_name: bankName || null,
+      account_holder_name: accountHolderName || null,
     };
 
     setIsLoading(true); // Start loading
@@ -88,6 +96,10 @@ const FundRequestForm = () => {
     setPatientName("");
     setDescription("");
     setDoctorId("");
+    setAccountNumber("");
+    setIfsc("");
+    setBankName("");
+    setAccountHolderName("");
   };
 
   const isFormValid = () => {
@@ -97,7 +109,6 @@ const FundRequestForm = () => {
   return (
     <div className="container mt-5 mb-5 d-flex align-items-center justify-content-center">
       <div className="row w-100">
-        {/* Image Section for Desktop */}
         <div className="col-md-6 d-none d-md-block">
           <img
             src="https://cslbd71.com/wp-content/uploads/2023/06/fundraising_cropped-500x353-1.jpg"
@@ -177,6 +188,55 @@ const FundRequestForm = () => {
                   </option>
                 ))}
               </select>
+            </div>
+
+            {/* Account Details */}
+            <div className="form-group">
+              <label htmlFor="accountNumber">Account Number</label>
+              <input
+                type="text"
+                className="form-control"
+                id="accountNumber"
+                value={accountNumber}
+                onChange={(e) => setAccountNumber(e.target.value)}
+                placeholder="Enter the account number"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="ifsc">IFSC Code</label>
+              <input
+                type="text"
+                className="form-control"
+                id="ifsc"
+                value={ifsc}
+                onChange={(e) => setIfsc(e.target.value)}
+                placeholder="Enter the IFSC code"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="bankName">Bank Name</label>
+              <input
+                type="text"
+                className="form-control"
+                id="bankName"
+                value={bankName}
+                onChange={(e) => setBankName(e.target.value)}
+                placeholder="Enter the bank name"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="accountHolderName">Account Holder Name</label>
+              <input
+                type="text"
+                className="form-control"
+                id="accountHolderName"
+                value={accountHolderName}
+                onChange={(e) => setAccountHolderName(e.target.value)}
+                placeholder="Enter the account holder's name"
+              />
             </div>
 
             {/* Submit Button */}

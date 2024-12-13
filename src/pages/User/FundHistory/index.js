@@ -8,10 +8,10 @@ const FundRequestListing = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user_data"));
+    const userId = localStorage.getItem("user_id");
 
-    if (user.id) {
-      fetchFundRequests(user.id);
+    if (userId) {
+      fetchFundRequests(userId);
     } else {
       setError("No user logged in");
       setLoading(false);
@@ -78,8 +78,9 @@ const FundRequestListing = () => {
                 <tr>
                   <th>ID</th>
                   <th>Patient Name</th>
-                  <th>Description</th>
-                  <th>Amount</th>
+                  <th>Blood Group</th>
+                  <th>Units</th>
+                  <th>Require Before</th>
                   <th>Status</th>
                   <th>Doctor</th>
                   <th>Created At</th>
@@ -91,8 +92,9 @@ const FundRequestListing = () => {
                     <tr key={request.id}>
                       <td>{request.id}</td>
                       <td>{request.patientName}</td>
-                      <td>{request.description}</td>
-                      <td>{request.amount}</td>
+                      <td>{request.bloodGroup}</td>
+                      <td>{request.units}</td>
+                      <td>{new Date(request.requireBefore).toLocaleString()}</td>
                       <td>
                         <span
                           className={`badge ${

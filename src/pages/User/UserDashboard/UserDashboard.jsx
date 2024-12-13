@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React from "react";
+import { Link } from "react-router-dom";
 
 const UserDashboard = () => {
   return (
@@ -87,13 +87,34 @@ const UserDashboard = () => {
             <div className="card-body">
               <h5 className="card-title">Fund Request History</h5>
               <p className="card-text">Click here to request see re.</p>
-              <Link to="/request-funds" className="btn btn-info btn-block">
+              <Link
+                to="/fund-request-history"
+                className="btn btn-info btn-block"
+              >
                 Go to Fund Request History
               </Link>
             </div>
           </div>
         </div>
-
+        <div className="col-md-6 col-lg-3 mb-4">
+          <div className="card shadow-lg border-info rounded">
+            <img
+              src="https://cslbd71.com/wp-content/uploads/2023/06/fundraising_cropped-500x353-1.jpg"
+              className="card-img-top"
+              alt="Request Funds"
+            />
+            <div className="card-body">
+              <h5 className="card-title">Donate now</h5>
+              <p className="card-text">Click here to Donate Funds.</p>
+              <Link
+                to="/fund-donation"
+                className="btn btn-info btn-block"
+              >
+                Donate Funds Now!
+              </Link>
+            </div>
+          </div>
+        </div>
 
         {/* Available Donors Card */}
         {/* <div className="col-md-6 col-lg-3 mb-4">
