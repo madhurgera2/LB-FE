@@ -1,0 +1,28 @@
+.equipment-leasing-container {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+  }
+  
+  .donation-selection {
+    margin-bottom: 20px;
+  }
+  
+  .donation-selection select {
+    padding: 8px;
+    font-size: 1rem;
+    margin-top: 10px;
+  }
+  
+  .donation-details {
+    margin-top: 20px;
+  }
+  
+  .donation-details h2 {
+    color: #2b5876;
+  }
+  
+  .donation-details p {
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+  
