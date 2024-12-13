@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import Joi from "joi-browser";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { SimpleToast } from "../../components/util/Toast/Toast";
 import { END_POINT } from "../../config/api";
 import "./login.css";
@@ -14,6 +14,7 @@ function Login(props) {
   const dark = props.theme;
   const [errorObj, setErrorObj] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const { toast, showToast, hideToast } = useToast();
 
@@ -70,6 +71,7 @@ function Login(props) {
         .then((response) => {
           console.log({ response });
           localStorage.setItem("user_data", response);
+          navigate("/user-dashboard");
         })
         .catch((err) => {
           console.error(err);
@@ -104,7 +106,6 @@ function Login(props) {
                 localStorage.setItem("LoggedIn", "true");
                 localStorage.setItem("Role", "user");
                 getCurrentUser();
-                window.location.href = "/user-dashboard";
               } else {
                 showToast("Invalid credentials!", "error"); // Updated to use showToast
               }
