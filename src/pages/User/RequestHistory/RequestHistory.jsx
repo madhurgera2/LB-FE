@@ -8,16 +8,17 @@ const RequestHistory = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const email = localStorage.getItem('email');
-    if (email) {
-      fetchRequestHistory(email);
+    const user = JSON.parse(localStorage.getItem('user_data'));
+
+    if (user.id) {
+      fetchRequestHistory(user.id);
     } else {
       setError('No user logged in');
       setLoading(false);
     }
   }, []);
 
-  const fetchRequestHistory = (email) => {
+  const fetchRequestHistory = (userId) => {
     const token = localStorage.getItem('jwtToken');
 
     if (!token) {
@@ -27,9 +28,10 @@ const RequestHistory = () => {
     }
 
     axios
-      .get(`${END_POINT}/requestHistory/${email}`, {
+      .get(`${END_POINT}/blood-request/list?userId=${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
+          "ngrok-skip-browser-warning": "true",
         },
       })
       .then((response) => {
@@ -75,14 +77,13 @@ const RequestHistory = () => {
               <thead className="table-dark">
                 <tr>
                   <th>ID</th>
-                  <th>Name</th>
-                  <th>Mobile</th>
-                  <th>Gender</th>
+                  <th>Patient Name</th>
                   <th>Blood Group</th>
-                  <th>Age</th>
-                  <th>Disease</th>
                   <th>Units</th>
+                  <th>Require Before</th>
                   <th>Status</th>
+                  <th>Doctor</th>
+                  <th>Created At</th>
                 </tr>
               </thead>
               <tbody>
@@ -90,23 +91,32 @@ const RequestHistory = () => {
                   requests.map((request) => (
                     <tr key={request.id}>
                       <td>{request.id}</td>
-                      <td>{request.name}</td>
-                      <td>{request.mobile}</td>
-                      <td>{request.gender}</td>
-                      <td>{request.bloodgroup}</td>
-                      <td>{request.age}</td>
-                      <td>{request.disease}</td>
+                      <td>{request.patientName}</td>
+                      <td>{request.bloodGroup}</td>
                       <td>{request.units}</td>
+                      <td>{new Date(request.requireBefore).toLocaleString()}</td>
                       <td>
-                        <span className={`badge ${request.status === 'accepted' ? 'bg-success' : request.status === 'rejected' ? 'bg-danger' : 'bg-warning'}`}>
-                          {request.status === 'false' ? 'Pending' : request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                        <span
+                          className={`badge ${
+                            request.status === 'PENDING'
+                              ? 'bg-warning'
+                              : request.status === 'ACCEPTED'
+                              ? 'bg-success'
+                              : 'bg-danger'
+                          }`}
+                        >
+                          {request.status.charAt(0) + request.status.slice(1).toLowerCase()}
                         </span>
                       </td>
+                      <td>{request.doctor ? request.doctor.username : 'N/A'}</td>
+                      <td>{new Date(request.createdAt).toLocaleString()}</td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="9" className="text-center">You have not made any requests yet.</td>
+                    <td colSpan="8" className="text-center">
+                      You have not made any requests yet.
+                    </td>
                   </tr>
                 )}
               </tbody>

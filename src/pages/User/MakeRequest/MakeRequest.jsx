@@ -1,49 +1,101 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import Swal from 'sweetalert2';
-import 'bootstrap/dist/css/bootstrap.min.css'; 
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import Swal from "sweetalert2";
+import "bootstrap/dist/css/bootstrap.min.css";
 import { END_POINT } from "../../../config/api";
+import { useNavigate } from "react-router-dom";
+
+function formatDeadlineToFullDateTime(deadline) {
+  // Parse the input deadline
+  const date = new Date(deadline);
+
+  // Extract year, month, day, hours, minutes, and seconds
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+
+  // Combine into the desired format
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+}
 
 const MakeRequest = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [bloodGroup, setBloodGroup] = useState('');
-  const [units, setUnits] = useState(0);
-  const [disease, setDisease] = useState('');
-  const [mobile, setMobile] = useState('');
-  const [gender, setGender] = useState('');
-  const [age, setAge] = useState('');
+  const [quantity, setQuantity] = useState(0);
+  const [group, setGroup] = useState("");
+  const [patientName, setPatientName] = useState("");
+  const [doctorId, setDoctorId] = useState("");
+  const [deadline, setDeadline] = useState("");
+  const [doctorList, setDoctorList] = useState([]);
+  const resetForm = () => {
+    setPatientName('');
+    setGroup('');
+    setQuantity(0);
+    setDoctorId('');
+    setDeadline('');
+  };
+  const navigate = useNavigate();
+  
+
+  useEffect(() => {
+    // Fetch the list of doctors
+    const token = localStorage.getItem("jwtToken");
+    if (token) {
+      axios
+        .get(`${END_POINT}/user/listDoctors`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            accept: "application/json",
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
+          },
+        })
+        .then((response) => {
+          const doctors = response.data.map((doctor) => ({
+            value: doctor.id,
+            text: doctor.username,
+          }));
+          setDoctorList(doctors);
+        })
+        .catch((error) => {
+          console.error("Error fetching doctors:", error);
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Failed to load doctor list.",
+          });
+        });
+    }
+  }, []);
 
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    // Get the JWT token from localStorage
-    const token = localStorage.getItem('jwtToken');
-
-    if (!token) {
+    // Get the JWT token from localStorage and user ID
+    const token = localStorage.getItem("jwtToken");
+    const user = JSON.parse(localStorage.getItem("user_data"));
+    if (!user.id) {
       Swal.fire({
-        icon: 'error',
-        title: 'Authentication Required',
-        text: 'Please log in to submit the request.',
+        icon: "error",
+        title: "Authentication Required",
+        text: "Please log in to submit the request.",
       });
       return;
     }
 
     const requestData = {
-      name,
-      email,
-      bloodgroup: bloodGroup,
-      units,
-      disease,
-      mobile,
-      gender,
-      age,
-      status: false,
+      user_id: user.id,
+      units: quantity,
+      blood_group: group,
+      patient_name: patientName,
+      doctor_id: Number(doctorId),
+      require_before: formatDeadlineToFullDateTime(deadline),
     };
 
     // Include the token in the Authorization header
     axios
-      .post(`${END_POINT}/requestblood`, requestData, {
+      .post(`${END_POINT}/blood-request/create`, requestData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -51,17 +103,19 @@ const MakeRequest = () => {
       .then((response) => {
         console.log(response.data);
         Swal.fire({
-          icon: 'success',
-          title: 'Success',
-          text: 'Blood request added successfully!',
+          icon: "success",
+          title: "Success",
+          text: "Blood request added successfully!",
         });
+        resetForm();
+        navigate("/user-dashboard");
       })
       .catch((error) => {
-        console.error('Error:', error);
+        console.error("Error:", error);
         Swal.fire({
-          icon: 'error',
-          title: 'Oops...',
-          text: 'Failed to add the blood request. Please try again later.',
+          icon: "error",
+          title: "Oops...",
+          text: "Failed to add the blood request. Please try again later.",
         });
       });
   };
@@ -71,151 +125,111 @@ const MakeRequest = () => {
       <div className="row justify-content-center">
         {/* Left Side Image */}
         <div className="col-md-6 mt-5 d-none d-md-block">
-          <img 
-            src="/images/blood-request-banner.jpg"  // Add your image source here
+          <img
+            src="/images/blood-request-banner.jpg" // Add your image source here
             alt="Donate Blood"
             className="img-fluid rounded"
-            style={{ marginTop: '60px' }}
+            style={{ marginTop: "60px" }}
           />
         </div>
 
         {/* Right Side Form */}
         <div className="col-md-6">
           <h1 className="text-center mb-4 text-primary">Make Blood Request</h1>
-          <form onSubmit={handleSubmit} className="shadow-lg p-4 bg-light rounded">
-            {/* Name */}
+          <form
+            onSubmit={handleSubmit}
+            className="shadow-lg p-4 bg-light rounded"
+          >
+            {/* Patient Name */}
             <div className="form-group">
-              <label htmlFor="name" className="font-weight-bold">Name <span className="text-danger">*</span></label>
+              <label htmlFor="patientName" className="font-weight-bold">
+                Patient Name <span className="text-danger">*</span>
+              </label>
               <input
                 type="text"
                 className="form-control"
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                id="patientName"
+                value={patientName}
+                onChange={(e) => setPatientName(e.target.value)}
                 required
-                placeholder="Enter your full name"
+                placeholder="Enter patient's full name"
               />
             </div>
 
-            {/* Email */}
+            {/* Blood Group */}
             <div className="form-group">
-              <label htmlFor="email" className="font-weight-bold">Email <span className="text-danger">*</span></label>
-              <input
-                type="email"
+              <label htmlFor="group" className="font-weight-bold">
+                Blood Group <span className="text-danger">*</span>
+              </label>
+              <select
                 className="form-control"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                id="group"
+                value={group}
+                onChange={(e) => setGroup(e.target.value)}
                 required
-                placeholder="Enter your email"
-              />
+              >
+                <option value="">Select Blood Group</option>
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+              </select>
             </div>
 
-            {/* Blood Group and Units in Same Row */}
-            <div className="form-row">
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label htmlFor="bloodGroup" className="font-weight-bold">Blood Group <span className="text-danger">*</span></label>
-                  <select
-                    className="form-control"
-                    id="bloodGroup"
-                    value={bloodGroup}
-                    onChange={(e) => setBloodGroup(e.target.value)}
-                    required
-                  >
-                    <option value="">Select Blood Group</option>
-                    <option value="A+">A+</option>
-                    <option value="A-">A-</option>
-                    <option value="B+">B+</option>
-                    <option value="B-">B-</option>
-                    <option value="AB+">AB+</option>
-                    <option value="AB-">AB-</option>
-                    <option value="O+">O+</option>
-                    <option value="O-">O-</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label htmlFor="units" className="font-weight-bold">Units <span className="text-danger">*</span></label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    id="units"
-                    value={units}
-                    onChange={(e) => setUnits(Number(e.target.value))}
-                    required
-                    placeholder="Enter number of units"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Disease */}
+            {/* Quantity (Units) */}
             <div className="form-group">
-              <label htmlFor="disease" className="font-weight-bold">Disease (Optional)</label>
+              <label htmlFor="quantity" className="font-weight-bold">
+                Quantity (Units) <span className="text-danger">*</span>
+              </label>
               <input
-                type="text"
+                type="number"
                 className="form-control"
-                id="disease"
-                value={disease}
-                onChange={(e) => setDisease(e.target.value)}
-                placeholder="Any known disease (optional)"
-              />
-            </div>
-
-            {/* Mobile */}
-            <div className="form-group">
-              <label htmlFor="mobile" className="font-weight-bold">Mobile <span className="text-danger">*</span></label>
-              <input
-                type="tel"
-                className="form-control"
-                id="mobile"
-                value={mobile}
-                onChange={(e) => setMobile(e.target.value)}
+                id="quantity"
+                value={quantity}
+                onChange={(e) => setQuantity(Number(e.target.value))}
                 required
-                placeholder="Enter your mobile number"
-                pattern="^\d{10}$"
-                title="Mobile number should be 10 digits"
+                placeholder="Enter number of units"
               />
             </div>
 
-            {/* Gender and Age in Same Row */}
-            <div className="form-row">
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label htmlFor="gender" className="font-weight-bold">Gender <span className="text-danger">*</span></label>
-                  <select
-                    className="form-control"
-                    id="gender"
-                    value={gender}
-                    onChange={(e) => setGender(e.target.value)}
-                    required
-                  >
-                    <option value="">Select Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-              </div>
+            {/* Doctor (Select from list) */}
+            <div className="form-group">
+              <label htmlFor="doctorId" className="font-weight-bold">
+                Doctor <span className="text-danger">*</span>
+              </label>
+              <select
+                className="form-control"
+                id="doctorId"
+                value={doctorId}
+                onChange={(e) => setDoctorId(e.target.value)}
+                required
+              >
+                <option value="">Select Doctor</option>
+                {doctorList.map((doctor) => (
+                  <option key={doctor.value} value={doctor.value}>
+                    {doctor.text}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label htmlFor="age" className="font-weight-bold">Age <span className="text-danger">*</span></label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    id="age"
-                    value={age}
-                    onChange={(e) => setAge(Number(e.target.value))}
-                    required
-                    placeholder="Enter your age"
-                    min="18"
-                  />
-                </div>
-              </div>
+            {/* Deadline Date */}
+            <div className="form-group">
+              <label htmlFor="deadline" className="font-weight-bold">
+                Deadline Date & Time <span className="text-danger">*</span>
+              </label>
+              <input
+                type="datetime-local"
+                className="form-control"
+                id="deadline"
+                value={deadline}
+                onChange={(e) => setDeadline(e.target.value)}
+                required
+              />
             </div>
 
             {/* Submit Button */}
@@ -223,7 +237,13 @@ const MakeRequest = () => {
               <button
                 type="submit"
                 className="btn btn-primary"
-                disabled={!name || !email || !bloodGroup || units <= 0 || !mobile || !gender || age <= 0}
+                disabled={
+                  !patientName ||
+                  !group ||
+                  quantity <= 0 ||
+                  !doctorId ||
+                  !deadline
+                }
               >
                 Submit
               </button>

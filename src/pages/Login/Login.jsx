@@ -66,11 +66,13 @@ function Login(props) {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
+          "ngrok-skip-browser-warning": "true",
         },
       })
+      .then((response) => response.json()) 
         .then((response) => {
           console.log({ response });
-          localStorage.setItem("user_data", response);
+          localStorage.setItem("user_data", JSON.stringify(response));
           navigate("/user-dashboard");
         })
         .catch((err) => {
