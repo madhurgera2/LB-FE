@@ -14,12 +14,12 @@ export const Navbar = (props) => {
   const [Role, setRole] = useState("");
 
   const { toast, showToast, hideToast } = useToast();
+  const user = JSON.parse(localStorage.getItem("user_data"));
 
   const toggleNav = () => setIsNavOpen(!isNavOpen);
   const closeMobileMenu = () => setIsNavOpen(false);
 
   const checkAuthentication = () => {
-    const user = localStorage.getItem("LoggedIn");
     const role = localStorage.getItem("Role");
     const isAuthenticated = user ? true : false;
 
@@ -43,11 +43,7 @@ export const Navbar = (props) => {
       <nav className={`${"navbar-div"} ${dark ? "navbar-div-dark" : ""}`}>
         {/* Logo */}
         <NavLink to="/" className={"navbar-logo"}>
-          <img
-            src="logo2.png"
-            alt="logo"
-            height="25px"
-          />
+          <img src="logo2.png" alt="logo" height="25px" />
         </NavLink>
 
         {/* Mobile Menu Icon */}
@@ -107,40 +103,7 @@ export const Navbar = (props) => {
               Contact Us
             </NavLink>
           </li>
-
-          {/* Medical Camp */}
-          <li className={dark ? "nav-item-dark" : "nav-item"}>
-            <NavLink
-              activeClassName={"active-link"}
-              to="/medical-camp"
-              className={({ isActive }) =>
-                `${
-                  isActive ? (dark ? "active-link-dark" : "active-link") : ""
-                } ${dark ? "nav-links-dark" : "nav-links"}`
-              }
-              onClick={closeMobileMenu}
-            >
-              Medical Camp
-            </NavLink>
-          </li>
-
-          {/* Equipment Leasing */}
-          <li className={dark ? "nav-item-dark" : "nav-item"}>
-            <NavLink
-              activeClassName={"active-link"}
-              to="/equipment-leasing"
-              className={({ isActive }) =>
-                `${
-                  isActive ? (dark ? "active-link-dark" : "active-link") : ""
-                } ${dark ? "nav-links-dark" : "nav-links"}`
-              }
-              onClick={closeMobileMenu}
-            >
-              Equipment Leasing
-            </NavLink>
-          </li>
-
-          {Role === "admin" && (
+          {user.role === "admin" && (
             <li className={dark ? "nav-item-dark" : "nav-item"}>
               <NavLink
                 activeClassName={"active-link"}
