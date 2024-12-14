@@ -22,6 +22,7 @@ import { NotFound } from "./components/ErrorHandlerPages/404/NotFound";
 import Events from "./pages/Home/components/Events/Events";
 import EquipmentLeasingPage from "./components/EquipmentLeasingPage/EquipmentLeasingPage";  // Import new page
 import MakeOrganRequest from "./pages/User/MakeOrganRequest/MakeOrganRequest";
+import OrganDonationRequests from "./pages/OrganDonationRequests/OrganDonationRequests";
 
 import ScrollToTop from "./components/util/ScrollToTop/ScrollToTop";
 import { Navbar } from "./components/Navbar/Navbar";
@@ -91,6 +92,7 @@ function App() {
             <Route path="/dean-dashboard" element={<DeanDashboard />} />
             {/* New Equipment Leasing Route */}
             <Route path="/equipment-leasing" element={<EquipmentLeasingPage />} />
+            <Route path="/organ-donation-requests" element={<OrganDonationRequests />} />
             {/* NotFound Route */}
             <Route path="*" element={<NotFound theme={theme} />} />
           </Routes>
