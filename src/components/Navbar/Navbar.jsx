@@ -103,7 +103,7 @@ export const Navbar = (props) => {
               Contact Us
             </NavLink>
           </li>
-          {user.role === "admin" && (
+          {user?.role === "admin" && (
             <li className={dark ? "nav-item-dark" : "nav-item"}>
               <NavLink
                 activeClassName={"active-link"}
