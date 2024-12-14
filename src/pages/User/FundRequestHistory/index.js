@@ -1,24 +1,23 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { END_POINT } from "../../../config/api";
+import Swal from "sweetalert2";
 
-const FundRequestListing = () => {
+const FundRequestDonation = () => {
   const [fundRequests, setFundRequests] = useState([]);
-  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  const [error, setError] = useState(null);
+  const [expandedDescription, setExpandedDescription] = useState({});
+  const [donationAmount, setDonationAmount] = useState({});
+  const [user, setUser] = useState(null);
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user_data"));
-
-    if (user.id) {
-      fetchFundRequests(user.id);
-    } else {
-      setError("No user logged in");
-      setLoading(false);
-    }
+    const userData = JSON.parse(localStorage.getItem("user_data"));
+    setUser(userData);
+    console.log(userData);
+    fetchFundRequests(userData?.role);
   }, []);
 
-  const fetchFundRequests = (userId) => {
+  const fetchFundRequests = (role) => {
     const token = localStorage.getItem("jwtToken");
 
     if (!token) {
@@ -27,8 +26,9 @@ const FundRequestListing = () => {
       return;
     }
 
+    const statusFilter = role === "admin" ? "" : "?status=APPROVED";
     axios
-      .get(`${END_POINT}/fund-request/list?userId=${userId}`, {
+      .get(`${END_POINT}/fund-request/list${statusFilter}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "ngrok-skip-browser-warning": "true",
@@ -40,20 +40,113 @@ const FundRequestListing = () => {
       })
       .catch((error) => {
         console.error("Error fetching fund requests:", error);
-        if (error.response && error.response.status === 401) {
-          setError("Authentication failed. Please login again.");
-        } else {
-          setError("Failed to fetch the fund requests. Please try again later.");
-        }
+        setError("Failed to fetch the fund requests. Please try again later.");
         setLoading(false);
+      });
+  };
+
+  const toggleDescription = (id) => {
+    setExpandedDescription((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
+  const handleDonation = (requestId) => {
+    if (!user || !donationAmount[requestId]) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Please enter a valid donation amount.",
+      });
+      return;
+    }
+
+    const payload = {
+      fund_request_id: requestId,
+      user_id: user.id,
+      amount: donationAmount[requestId],
+    };
+
+    const token = localStorage.getItem("jwtToken");
+
+    axios
+      .post(`${END_POINT}/fund-donation/donate`, payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      })
+      .then(() => {
+        Swal.fire({
+          title: "Donate Now",
+          html: `
+            <div class='text-center'>
+              <img 
+                src='https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg' 
+                alt='QR Code' 
+                class='img-fluid mb-3'
+              />
+              <p>Scan the QR code to complete your donation.</p>
+            </div>
+          `,
+          showConfirmButton: false,
+          timer: 5000,
+          timerProgressBar: true,
+        }).then(() => {
+          Swal.fire({
+            icon: "success",
+            title: "Donation Successful",
+            text: "Thank you for your generosity!",
+          });
+
+          fetchFundRequests(user.role);
+          setDonationAmount({});
+        });
+      })
+      .catch((error) => {
+        console.error("Error processing donation:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to process the donation. Please try again later.",
+        });
+      });
+  };
+
+  const handleApproveOrReject = (requestId, action) => {
+    const token = localStorage.getItem("jwtToken");
+    const actionUrl =
+      action === "approve"
+        ? `${END_POINT}/fund-request/approve/${requestId}`
+        : `${END_POINT}/fund-request/reject/${requestId}`;
+
+    axios
+      .put(actionUrl, {}, { headers: { Authorization: `Bearer ${token}` } })
+      .then(() => {
+        Swal.fire({
+          icon: "success",
+          title: `Request ${action === "approve" ? "Approved" : "Rejected"}`,
+        });
+        fetchFundRequests(user.role);
+      })
+      .catch((error) => {
+        console.error(
+          `Error ${action === "approve" ? "approving" : "rejecting"} request:`,
+          error
+        );
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: `Failed to ${action} the request. Please try again later.`,
+        });
       });
   };
 
   return (
     <div className="container mt-5">
-      <h1 className="text-center text-primary mb-4">Fund Request Listing</h1>
+      <h1 className="text-center text-primary mb-4">Fund Requests</h1>
 
-      {/* Loading Spinner */}
       {loading && (
         <div className="d-flex justify-content-center my-4">
           <div className="spinner-border text-primary" role="status">
@@ -62,68 +155,108 @@ const FundRequestListing = () => {
         </div>
       )}
 
-      {/* Error Message */}
       {error && (
         <div className="alert alert-danger text-center" role="alert">
           {error}
         </div>
       )}
 
-      {/* Fund Request Table */}
       {!loading && !error && (
-        <div className="card shadow-sm">
-          <div className="card-body">
-            <table className="table table-striped table-bordered table-hover">
-              <thead className="table-dark">
-                <tr>
-                  <th>ID</th>
-                  <th>Patient Name</th>
-                  <th>Description</th>
-                  <th>Amount</th>
-                  <th>Status</th>
-                  <th>Doctor</th>
-                  <th>Created At</th>
-                </tr>
-              </thead>
-              <tbody>
-                {fundRequests.length > 0 ? (
-                  fundRequests.map((request) => (
-                    <tr key={request.id}>
-                      <td>{request.id}</td>
-                      <td>{request.patientName}</td>
-                      <td>{request.description}</td>
-                      <td>{request.amount}</td>
-                      <td>
-                        <span
-                          className={`badge ${
-                            request.status === "PENDING"
-                              ? "bg-warning"
-                              : request.status === "ACCEPTED"
-                              ? "bg-success"
-                              : "bg-danger"
+        <div className="row">
+          {fundRequests.length > 0 ? (
+            fundRequests.map((request) => (
+              <div className="col-md-4 mb-4" key={request.id}>
+                <div className="card shadow-sm">
+                  <div className="card-body">
+                    <h5 className="card-title text-primary">
+                      {request.patientName} `Role : {user?.role}`
+                    </h5>
+                    <p className="card-text">
+                      {expandedDescription[request.id]
+                        ? request.description
+                        : `${request.description.slice(0, 100)}${
+                            request.description.length > 100 ? "..." : ""
                           }`}
+                      {request.description.length > 100 && (
+                        <button
+                          className="btn btn-link btn-sm p-0 ms-1"
+                          onClick={() => toggleDescription(request.id)}
                         >
-                          {request.status.charAt(0) + request.status.slice(1).toLowerCase()}
-                        </span>
-                      </td>
-                      <td>{request.doctor ? request.doctor.username : "N/A"}</td>
-                      <td>{new Date(request.createdAt).toLocaleString()}</td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="8" className="text-center">
-                      No fund requests found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                          {expandedDescription[request.id]
+                            ? "Show Less"
+                            : "Show More"}
+                        </button>
+                      )}
+                    </p>
+                    <p>
+                      <strong>Amount Required:</strong> {request.amount} <br />
+                      <strong>Amount Raised:</strong>{" "}
+                      {request.amountRaised || 0}
+                    </p>
+                    {user?.role === "admin" ? (
+                      request.status === "PENDING" ? (
+                        <div className="d-flex justify-content-between">
+                          <button
+                            className="btn btn-success"
+                            onClick={() =>
+                              handleApproveOrReject(request.id, "approve")
+                            }
+                          >
+                            Approve
+                          </button>
+                          <button
+                            className="btn btn-danger"
+                            onClick={() =>
+                              handleApproveOrReject(request.id, "reject")
+                            }
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      ) : request.status === "COMPLETED" ? (
+                        <button className="btn btn-success w-100" disabled>
+                          Fund Raised
+                        </button>
+                      ) : null
+                    ) : (
+                      request.status === "APPROVED" && (
+                        <>
+                          <div className="mb-3">
+                            <input
+                              type="number"
+                              className="form-control"
+                              placeholder="Enter donation amount"
+                              value={donationAmount[request.id] || ""}
+                              onChange={(e) =>
+                                setDonationAmount((prev) => ({
+                                  ...prev,
+                                  [request.id]: e.target.value,
+                                }))
+                              }
+                            />
+                          </div>
+                          <button
+                            className="btn btn-success w-100"
+                            onClick={() => handleDonation(request.id)}
+                          >
+                            Donate Now
+                          </button>
+                        </>
+                      )
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center w-100">
+              <p>No fund requests found.</p>
+            </div>
+          )}
         </div>
       )}
     </div>
   );
 };
 
-export default FundRequestListing;
+export default FundRequestDonation;

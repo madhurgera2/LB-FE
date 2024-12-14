@@ -50,6 +50,7 @@ const FundRequestDonation = () => {
 
   const handleDonate = (requestId) => {
     const user = JSON.parse(localStorage.getItem("user_data"));
+    console.log(user);
 
     if (!user || !donationAmount[requestId]) {
       Swal.fire({

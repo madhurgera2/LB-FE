@@ -30,6 +30,7 @@ import { useToast } from "./services/toastService";
 import FundRequestForm from "./pages/User/RequestFunds";
 import FundRequestHistory from "./pages/User/FundRequestHistory";
 import FundRequestDonation from "./pages/DonateMoney";
+import AdminLogin from "./pages/AdminLogin";
 
 function App() {
   const getTheme = () => JSON.parse(localStorage.getItem("dark")) || false;
@@ -77,6 +78,7 @@ function App() {
             <Route path="/request-funds" element={<FundRequestForm />} />
             <Route path="/fund-request-history" element={<FundRequestHistory />} />
             <Route path="/fund-donation" element={<FundRequestDonation />} />
+            <Route path="/admin-login" element={<AdminLogin />} />
             {/* New Equipment Leasing Route */}
             <Route path="/equipment-leasing" element={<EquipmentLeasingPage />} />
             {/* NotFound Route */}

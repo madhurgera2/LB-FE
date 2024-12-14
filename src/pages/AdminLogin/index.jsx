@@ -1,12 +1,13 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Joi from "joi-browser";
 import { Link, useNavigate } from "react-router-dom";
 import { SimpleToast } from "../../components/util/Toast/Toast";
 import { END_POINT } from "../../config/api";
 import "./login.css";
 import { useToast } from "../../services/toastService";
+import { use } from "react";
 
-function Login(props) {
+function AdminLogin(props) {
   const [hidePassword, setHidePassword] = useState(false);
   const passwordInput = useRef("password");
   const schema = { email: "", password: "" };
@@ -73,12 +74,7 @@ function Login(props) {
         .then((response) => {
           console.log({ response });
           localStorage.setItem("user_data", JSON.stringify(response));
-          if (response.role === "admin") {
-            // route to "/admin-dashboard"
-            window.location.replace("/admin-dashboard")
-          } else {
-            window.location.replace("/user-dashboard")
-          }
+          navigate("/user-dashboard");
         })
         .catch((err) => {
           console.error(err);
@@ -131,6 +127,18 @@ function Login(props) {
         });
     }
   };
+
+  // logout user if already logged in
+  const logoutUser = () => {
+    localStorage.removeItem("jwtToken");
+    localStorage.removeItem("email");
+    localStorage.removeItem("LoggedIn");
+    localStorage.removeItem("Role");
+    localStorage.removeItem("user_data");
+  };
+  useEffect(() => {
+    logoutUser();
+  }, []);
 
   const loginAdmin = (e) => {
     e.preventDefault();
@@ -300,19 +308,11 @@ function Login(props) {
                     <button
                       id="btn"
                       type="submit"
-                      className="submit-btn primary"
+                      className="submit-btn secondary"
                       onClick={loginUser}
                     >
-                      Login as User
-                    </button>
-                    {/* <button
-                      id="btn"
-                      type="submit"
-                      className="submit-btn secondary"
-                      onClick={loginAdmin}
-                    >
                       Login as Admin
-                    </button> */}
+                    </button>
                   </div>
                 </div>
               </form>
@@ -331,4 +331,4 @@ function Login(props) {
   );
 }
 
-export default Login;
+export default AdminLogin;
