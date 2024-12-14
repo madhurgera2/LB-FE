@@ -21,6 +21,7 @@ import DonorLists from "./pages/User/DonorLists/DonorLists";
 import { NotFound } from "./components/ErrorHandlerPages/404/NotFound";
 import Events from "./pages/Home/components/Events/Events";
 import EquipmentLeasingPage from "./components/EquipmentLeasingPage/EquipmentLeasingPage";  // Import new page
+import MakeOrganRequest from "./pages/User/MakeOrganRequest/MakeOrganRequest";
 
 import ScrollToTop from "./components/util/ScrollToTop/ScrollToTop";
 import { Navbar } from "./components/Navbar/Navbar";
@@ -83,6 +84,7 @@ function App() {
             <Route path="/admin-login" element={<AdminLogin />} />
             <Route path="/add-doctor" element={<AddDoctor />} />
             <Route path="/blood-donation-requests" element={<BloodDonationRequests />} />
+            <Route path="/makeOrganRequest" element={<MakeOrganRequest />} />
             {/* New Equipment Leasing Route */}
             <Route path="/equipment-leasing" element={<EquipmentLeasingPage />} />
             {/* NotFound Route */}
