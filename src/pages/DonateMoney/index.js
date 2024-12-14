@@ -9,12 +9,15 @@ const FundRequestDonation = () => {
   const [error, setError] = useState(null);
   const [expandedDescription, setExpandedDescription] = useState({});
   const [donationAmount, setDonationAmount] = useState({});
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    fetchFundRequests();
+    const userData = JSON.parse(localStorage.getItem("user_data"));
+    setUser(userData);
+    fetchFundRequests(userData?.role);
   }, []);
 
-  const fetchFundRequests = () => {
+  const fetchFundRequests = (role) => {
     const token = localStorage.getItem("jwtToken");
 
     if (!token) {
@@ -23,8 +26,9 @@ const FundRequestDonation = () => {
       return;
     }
 
+    const statusFilter = role === "admin" ? "" : "?status=APPROVED";
     axios
-      .get(`${END_POINT}/fund-request/list?status=APPROVED`, {
+      .get(`${END_POINT}/fund-request/list${statusFilter}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "ngrok-skip-browser-warning": "true",
@@ -48,10 +52,7 @@ const FundRequestDonation = () => {
     }));
   };
 
-  const handleDonate = (requestId) => {
-    const user = JSON.parse(localStorage.getItem("user_data"));
-    console.log(user);
-
+  const handleDonation = (requestId) => {
     if (!user || !donationAmount[requestId]) {
       Swal.fire({
         icon: "error",
@@ -99,9 +100,8 @@ const FundRequestDonation = () => {
             text: "Thank you for your generosity!",
           });
 
-          // Refetch the list after donation
-          fetchFundRequests();
-          setDonationAmount({}); // Reset donation amount
+          fetchFundRequests(user.role);
+          setDonationAmount({});
         });
       })
       .catch((error) => {
@@ -114,9 +114,38 @@ const FundRequestDonation = () => {
       });
   };
 
+  const handleApproveOrReject = (requestId, action) => {
+    const token = localStorage.getItem("jwtToken");
+    const actionUrl =
+      action === "approve"
+        ? `${END_POINT}/fund-request/approve/${requestId}`
+        : `${END_POINT}/fund-request/reject/${requestId}`;
+
+    axios
+      .put(actionUrl, {}, { headers: { Authorization: `Bearer ${token}` } })
+      .then(() => {
+        Swal.fire({
+          icon: "success",
+          title: `Request ${action === "approve" ? "Approved" : "Rejected"}`,
+        });
+        fetchFundRequests(user.role);
+      })
+      .catch((error) => {
+        console.error(
+          `Error ${action === "approve" ? "approving" : "rejecting"} request:`,
+          error
+        );
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: `Failed to ${action} the request. Please try again later.`,
+        });
+      });
+  };
+
   return (
     <div className="container mt-5">
-      <h1 className="text-center text-primary mb-4">Donate to Fund Requests</h1>
+      <h1 className="text-center text-primary mb-4">Fund Requests</h1>
 
       {loading && (
         <div className="d-flex justify-content-center my-4">
@@ -139,9 +168,15 @@ const FundRequestDonation = () => {
               <div className="col-md-4 mb-4" key={request.id}>
                 <div className="card shadow-sm">
                   <div className="card-body">
-                    <h5 className="card-title text-primary">
-                      {request.patientName}
-                    </h5>
+                    <div className="d-flex justify-content-between item-center ">
+                      <h5 className="card-title text-primary text-wrap">
+                        {request.patientName}
+                      </h5>
+                      <p className="card-title fs-6 fw-bolder">
+                        {request.status}
+                      </p>
+                    </div>
+
                     <p className="card-text">
                       {expandedDescription[request.id]
                         ? request.description
@@ -164,26 +199,58 @@ const FundRequestDonation = () => {
                       <strong>Amount Raised:</strong>{" "}
                       {request.amountRaised || 0}
                     </p>
-                    <div className="mb-3">
-                      <input
-                        type="number"
-                        className="form-control"
-                        placeholder="Enter donation amount"
-                        value={donationAmount[request.id] || ""}
-                        onChange={(e) =>
-                          setDonationAmount((prev) => ({
-                            ...prev,
-                            [request.id]: e.target.value,
-                          }))
-                        }
-                      />
-                    </div>
-                    <button
-                      className="btn btn-success w-100"
-                      onClick={() => handleDonate(request.id)}
-                    >
-                      Donate Now
-                    </button>
+
+                    {user?.role === "admin" ? (
+                      request.status === "PENDING" ? (
+                        <div className="d-flex justify-content-between">
+                          <button
+                            className="btn btn-success"
+                            onClick={() =>
+                              handleApproveOrReject(request.id, "approve")
+                            }
+                          >
+                            Approve
+                          </button>
+                          <button
+                            className="btn btn-danger"
+                            onClick={() =>
+                              handleApproveOrReject(request.id, "reject")
+                            }
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      ) : request.status === "COMPLETED" ? (
+                        <button className="btn btn-success w-100" disabled>
+                          Fund Raised
+                        </button>
+                      ) : null
+                    ) : (
+                      request.status === "APPROVED" && (
+                        <>
+                          <div className="mb-3">
+                            <input
+                              type="number"
+                              className="form-control"
+                              placeholder="Enter donation amount"
+                              value={donationAmount[request.id] || ""}
+                              onChange={(e) =>
+                                setDonationAmount((prev) => ({
+                                  ...prev,
+                                  [request.id]: e.target.value,
+                                }))
+                              }
+                            />
+                          </div>
+                          <button
+                            className="btn btn-success w-100"
+                            onClick={() => handleDonation(request.id)}
+                          >
+                            Donate Now
+                          </button>
+                        </>
+                      )
+                    )}
                   </div>
                 </div>
               </div>

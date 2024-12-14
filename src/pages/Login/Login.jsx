@@ -303,7 +303,7 @@ function Login(props) {
                       className="submit-btn primary"
                       onClick={loginUser}
                     >
-                      Login as User
+                      Login
                     </button>
                     {/* <button
                       id="btn"
