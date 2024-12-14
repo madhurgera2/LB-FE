@@ -26,7 +26,7 @@ function DeanDashboard() {
           </div>
         </div>
         {/* Organ Donation Card */}
-        <div className="col-md-4 mb-4">
+        <div className="col-md-6 col-lg-3 mb-4">
           <div className="card shadow-lg border-danger rounded">
             <img
               src="https://static.india.com/wp-content/uploads/2022/11/Organ-Donation-5-Things-to-Keep-in-Mind-When-Considering-to-Donate-Organ.jpeg?impolicy=Medium_Widthonly&w=700"
