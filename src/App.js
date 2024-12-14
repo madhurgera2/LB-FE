@@ -34,6 +34,8 @@ import FundRequestDonation from "./pages/DonateMoney";
 import AdminLogin from "./pages/AdminLogin";
 import AddDoctor from "./pages/Admin/AddDoctor";
 import BloodDonationRequests from "./pages/Admin/DonationRequests";
+import OrganRequestHistory from "./pages/OrganRequestHistory/OrganRequestHistory";
+import DeanDashboard from "./pages/Dean/DeanDashboard/DeanDashboard";
 
 function App() {
   const getTheme = () => JSON.parse(localStorage.getItem("dark")) || false;
@@ -85,6 +87,8 @@ function App() {
             <Route path="/add-doctor" element={<AddDoctor />} />
             <Route path="/blood-donation-requests" element={<BloodDonationRequests />} />
             <Route path="/makeOrganRequest" element={<MakeOrganRequest />} />
+            <Route path="/organ-request-history" element={<OrganRequestHistory />} />
+            <Route path="/dean-dashboard" element={<DeanDashboard />} />
             {/* New Equipment Leasing Route */}
             <Route path="/equipment-leasing" element={<EquipmentLeasingPage />} />
             {/* NotFound Route */}

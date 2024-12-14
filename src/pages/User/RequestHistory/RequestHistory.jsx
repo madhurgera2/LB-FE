@@ -167,7 +167,7 @@ const BloodDonationRequests = () => {
 
   return (
     <div className="container my-5">
-      <h1 className="text-center text-primary mb-4">Blood Donation Requests</h1>
+      <h1 className="text-center text-primary mb-4">Blood Requests</h1>
 
       {loading ? (
         <div className="d-flex justify-content-center">

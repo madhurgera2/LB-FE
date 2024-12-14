@@ -74,10 +74,11 @@ function Login(props) {
           console.log({ response });
           localStorage.setItem("user_data", JSON.stringify(response));
           if (response.role === "admin") {
-            // route to "/admin-dashboard"
-            window.location.replace("/admin-dashboard")
+            window.location.replace("/admin-dashboard");
+          } else if (response.role === "dean") {
+            window.location.replace("/dean-dashboard");
           } else {
-            window.location.replace("/user-dashboard")
+            window.location.replace("/user-dashboard");
           }
         })
         .catch((err) => {
@@ -297,9 +298,9 @@ function Login(props) {
                     </label> */}
                   </div>
                   <div className="submit-btns">
-                    <button
+                    <button 
                       id="btn"
-                      type="submit"
+                      type="submit" 
                       className="submit-btn primary"
                       onClick={loginUser}
                     >
@@ -307,7 +308,7 @@ function Login(props) {
                     </button>
                     {/* <button
                       id="btn"
-                      type="submit"
+                      type="submit" 
                       className="submit-btn secondary"
                       onClick={loginAdmin}
                     >
