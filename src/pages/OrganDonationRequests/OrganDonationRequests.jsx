@@ -17,81 +17,93 @@ const OrganDonationRequests = () => {
 
   const fetchOrganDonations = () => {
     const token = localStorage.getItem("jwtToken");
-    
-    axios.get(`${END_POINT}/organ-donation/list`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    })
-    .then(response => {
-      setDonations(response.data);
-      setLoading(false);
-    })
-    .catch(error => {
-      console.error("Error fetching organ donations:", error);
-      setError("Failed to fetch organ donations");
-      setLoading(false);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Failed to load organ donation requests'
+
+    axios
+      .get(`${END_POINT}/organ-donation/list`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
+        },
+      })
+      .then((response) => {
+        setDonations(response.data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching organ donations:", error);
+        setError("Failed to fetch organ donations");
+        setLoading(false);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to load organ donation requests",
+        });
       });
-    });
   };
 
   const handleApprove = (donationId) => {
     const token = localStorage.getItem("jwtToken");
-    
-    axios.post(`${END_POINT}/organ-donation/approve/${donationId}`, {}, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    })
-    .then(response => {
-      Swal.fire({
-        icon: 'success',
-        title: 'Approved',
-        text: 'Organ donation request has been approved'
+
+    axios
+      .post(
+        `${END_POINT}/organ-donation/approve/${donationId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      .then((response) => {
+        Swal.fire({
+          icon: "success",
+          title: "Approved",
+          text: "Organ donation request has been approved",
+        });
+        fetchOrganDonations();
+      })
+      .catch((error) => {
+        console.error("Error approving donation:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to approve organ donation request",
+        });
       });
-      fetchOrganDonations();
-    })
-    .catch(error => {
-      console.error("Error approving donation:", error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Failed to approve organ donation request'
-      });
-    });
   };
 
   const handleReject = (donationId) => {
     const token = localStorage.getItem("jwtToken");
-    
-    axios.post(`${END_POINT}/organ-donation/reject/${donationId}`, {}, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    })
-    .then(response => {
-      Swal.fire({
-        icon: 'success',
-        title: 'Rejected',
-        text: 'Organ donation request has been rejected'
+
+    axios
+      .post(
+        `${END_POINT}/organ-donation/reject/${donationId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      .then((response) => {
+        Swal.fire({
+          icon: "success",
+          title: "Rejected",
+          text: "Organ donation request has been rejected",
+        });
+        fetchOrganDonations();
+      })
+      .catch((error) => {
+        console.error("Error rejecting donation:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to reject organ donation request",
+        });
       });
-      fetchOrganDonations();
-    })
-    .catch(error => {
-      console.error("Error rejecting donation:", error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Failed to reject organ donation request'
-      });
-    });
   };
 
   const handleViewDetails = (donation) => {
@@ -137,15 +149,15 @@ const OrganDonationRequests = () => {
               <td>{donation.timeOfDonation}</td>
               <td>{donation.status}</td>
               <td>
-                {donation.status === 'PENDING' && (
+                {donation.status === "PENDING" && (
                   <>
-                    <button 
+                    <button
                       className="btn btn-success btn-sm mr-2"
                       onClick={() => handleApprove(donation.id)}
                     >
                       Approve
                     </button>
-                    <button 
+                    <button
                       className="btn btn-danger btn-sm"
                       onClick={() => handleReject(donation.id)}
                     >
@@ -167,13 +179,30 @@ const OrganDonationRequests = () => {
         <Modal.Body>
           {selectedDonation && (
             <div>
-              <p><strong>Name:</strong> {selectedDonation.donorName}</p>
-              <p><strong>Organ Type:</strong> {selectedDonation.organType}</p>
-              <p><strong>Age:</strong> {selectedDonation.age}</p>
-              <p><strong>Blood Group:</strong> {selectedDonation.bloodGroup}</p>
-              <p><strong>Medical Conditions:</strong> {selectedDonation.medicalConditions || 'None'}</p>
-              <p><strong>Previous Surgeries:</strong> {selectedDonation.previousSurgeries || 'None'}</p>
-              <p><strong>Current Medications:</strong> {selectedDonation.currentMedications || 'None'}</p>
+              <p>
+                <strong>Name:</strong> {selectedDonation.donorName}
+              </p>
+              <p>
+                <strong>Organ Type:</strong> {selectedDonation.organType}
+              </p>
+              <p>
+                <strong>Age:</strong> {selectedDonation.age}
+              </p>
+              <p>
+                <strong>Blood Group:</strong> {selectedDonation.bloodGroup}
+              </p>
+              <p>
+                <strong>Medical Conditions:</strong>{" "}
+                {selectedDonation.medicalConditions || "None"}
+              </p>
+              <p>
+                <strong>Previous Surgeries:</strong>{" "}
+                {selectedDonation.previousSurgeries || "None"}
+              </p>
+              <p>
+                <strong>Current Medications:</strong>{" "}
+                {selectedDonation.currentMedications || "None"}
+              </p>
             </div>
           )}
         </Modal.Body>
