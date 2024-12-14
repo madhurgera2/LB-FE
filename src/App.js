@@ -23,6 +23,7 @@ import Events from "./pages/Home/components/Events/Events";
 import EquipmentLeasingPage from "./components/EquipmentLeasingPage/EquipmentLeasingPage";  // Import new page
 import MakeOrganRequest from "./pages/User/MakeOrganRequest/MakeOrganRequest";
 import OrganDonationRequests from "./pages/OrganDonationRequests/OrganDonationRequests";
+import DonateOrgan from "./pages/User/DonateOrgan/DonateOrgan";
 
 import ScrollToTop from "./components/util/ScrollToTop/ScrollToTop";
 import { Navbar } from "./components/Navbar/Navbar";
@@ -93,6 +94,7 @@ function App() {
             {/* New Equipment Leasing Route */}
             <Route path="/equipment-leasing" element={<EquipmentLeasingPage />} />
             <Route path="/organ-donation-requests" element={<OrganDonationRequests />} />
+            <Route path="/donate-organ" element={<DonateOrgan />} />
             {/* NotFound Route */}
             <Route path="*" element={<NotFound theme={theme} />} />
           </Routes>

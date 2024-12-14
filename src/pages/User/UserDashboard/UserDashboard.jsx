@@ -153,6 +153,24 @@ const UserDashboard = () => {
           </div>
         </div>
 
+        {/* Donate Organ Card */}
+        <div className="col-md-6 col-lg-3 mb-4">
+          <div className="card shadow-lg border-danger rounded">
+            <img
+              src="https://static.india.com/wp-content/uploads/2022/11/Organ-Donation-5-Things-to-Keep-in-Mind-When-Considering-to-Donate-Organ.jpeg?impolicy=Medium_Widthonly&w=700"
+              className="card-img-top"
+              alt="Donate Organ"
+            />
+            <div className="card-body">
+              <h5 className="card-title">Donate Organ</h5>
+              <p className="card-text">Click here to donate an organ.</p>
+              <Link to="/donate-organ" className="btn btn-danger btn-block">
+                Donate Organ
+              </Link>
+            </div>
+          </div>
+        </div>
+
         {/* Available Donors Card */}
         {/* <div className="col-md-6 col-lg-3 mb-4">
           <div className="card shadow-lg border-warning rounded">
